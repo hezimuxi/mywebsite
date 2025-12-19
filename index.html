@@ -36,7 +36,7 @@ function getHeartRate() {
     document.getElementById('hr').textContent = hr;
     document.getElementById('msg').textContent = "测量完成";
 
-    if (hr >= 95 || hr <= 60) {
+    if (hr >= 81 || hr <= 80) {
       showAlert('心率异常');
       playBuzzNTimes(5);
     }
@@ -65,4 +65,5 @@ function playBuzzNTimes(n) {
 </script>
 </body>
 </html>
+
 
