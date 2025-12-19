@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>心率检测报警</title>
+  <style>
+    body { background: #e9fafe; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;}
+    .mainbox { background: #fff; border-radius: 16px; box-shadow:0 0 18px #bdc; padding: 50px 35px; width: 340px; text-align: center;}
+    .btn { padding: 12px 34px; border: none; background: linear-gradient(93deg,#60efbc,#58d5c9,#7766e6); border-radius: 22px;
+      color: #fff; font-size: 20px; font-weight: 600; box-shadow:0 2px 18px #aeec; cursor: pointer; margin:25px 0 0 0;}
+    .btn:hover { background:linear-gradient(93deg,#58d5c9,#60efbc,#7766e6);}
+    .hr { font-size: 62px; color: #e74c3c; margin: 35px 0 20px 0;}
+    .alert { font-size:22px; color:#d32f2f; font-weight: bold;}
+    .msg { color:#555; font-size: 16px;}
+  </style>
+</head>
+<body>
+<div class="mainbox">
+  <h2>心率检测报警</h2>
+  <div class="hr" id="hr">--</div>
+  <div id="msg" class="msg">点击下方按钮获取心率</div>
+  <div id="alertArea"></div>
+  <button class="btn" onclick="getHeartRate()">测心率</button>
+  <audio id="buzzer" src="music/buzz.mp3"></audio>
+</div>
+<script>
+async function getHeartRate() {
+  document.getElementById('msg').textContent = "正在获取心率...";
+  document.getElementById('hr').textContent = "--";
+  document.getElementById('alertArea').textContent = "";
+  try {
+    const resp = await fetch('http://localhost:3000/getHeartRate');
+    const json = await resp.json();
+    const hr = json.heartRate;
+    if(hr){
+      document.getElementById('hr').textContent = hr;
+      document.getElementById('msg').textContent = "测量完成";
+      if (parseInt(hr) === 70) {
+        showAlert('心率异常');
+        playBuzzNTimes(5);
+      }
+    }else{
+      document.getElementById('msg').textContent = "未获取到心率";
+    }
+  } catch(e) {
+    document.getElementById('msg').textContent = "获取失败：" + e.message;
+  }
+}
+
+function showAlert(str){
+  document.getElementById('alertArea').innerHTML = `<div class="alert">${str}</div>`;
+}
+
+function playBuzzNTimes(n) {
+  let cnt = 0;
+  const audio = document.getElementById('buzzer');
+  audio.currentTime = 0;
+  audio.volume = 1;
+  audio.play();
+  audio.onended = function () {
+    cnt++;
+    if (cnt < n) {
+      audio.currentTime = 0;
+      audio.play();
+    } else {
+      audio.onended = null;
+    }
+  }
+}
+</script>
+</body>
+</html>
